@@ -7,13 +7,13 @@ import (
 	"time"
 )
 
-func CloudflareDoH(dnsmessage []byte) ([]byte, error) {
+func Resolve(dnsmessage []byte, provider string) ([]byte, error) {
 	var body []byte
 
 	client := http.Client{
 		Timeout: 10 * time.Second,
 	}
-	req, err := http.NewRequest("POST", "https://1.1.1.1/dns-query", bytes.NewReader(dnsmessage))
+	req, err := http.NewRequest("POST", provider, bytes.NewReader(dnsmessage))
 	if err != nil {
 		return nil, err
 	}

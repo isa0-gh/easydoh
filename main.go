@@ -5,14 +5,16 @@ import (
 	"log"
 	"net"
 
-	"github.com/isa0-gh/cf-doh/resolver"
+	"github.com/isa0-gh/easydoh/config"
+	"github.com/isa0-gh/easydoh/providers"
+	"github.com/isa0-gh/easydoh/resolver"
 )
 
 var bindAddr = "127.0.0.1:53"
 
 func HandleConn(data []byte, addr *net.UDPAddr, conn *net.UDPConn) {
 
-	resp, err := resolver.CloudflareDoH(data)
+	resp, err := resolver.Resolve(data, providers.DnsProviders[config.Conf.Resolver])
 	if err != nil {
 		fmt.Printf("ERROR: %s", err.Error())
 		return
@@ -36,7 +38,7 @@ func main() {
 	}
 	defer conn.Close()
 
-	log.Printf("[+] cf-doh started. Listening on %s\n", bindAddr)
+	log.Printf("[+] easydoh started. Resolver: %s Listening on %s\n", config.Conf.Resolver, bindAddr)
 
 	buf := make([]byte, 4096)
 
