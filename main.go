@@ -11,6 +11,7 @@ import (
 var bindAddr = "127.0.0.1:53"
 
 func HandleConn(data []byte, addr *net.UDPAddr, conn *net.UDPConn) {
+
 	resp, err := resolver.CloudflareDoH(data)
 	if err != nil {
 		fmt.Printf("ERROR: %s", err.Error())

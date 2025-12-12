@@ -9,6 +9,7 @@ import (
 
 func CloudflareDoH(dnsmessage []byte) ([]byte, error) {
 	var body []byte
+
 	client := http.Client{
 		Timeout: 10 * time.Second,
 	}
@@ -26,6 +27,9 @@ func CloudflareDoH(dnsmessage []byte) ([]byte, error) {
 	defer resp.Body.Close()
 
 	body, err = io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 
 	return body, err
 
