@@ -6,8 +6,9 @@ import (
 )
 
 type Config struct {
-	Resolver string `json:"resolver"`
-	TTL      int    `json:"ttl"`
+	Resolver    string `json:"resolver"`
+	TTL         int    `json:"ttl"`
+	BindAddress string `json:"bind_address"`
 }
 
 var Conf Config
@@ -15,11 +16,14 @@ var Conf Config
 const configPath = "/etc/easydoh/config.json"
 
 func init() {
+	// Try to open the config file
 	file, err := os.Open(configPath)
 	if err != nil {
+		// File doesn't exist, create default config
 		Conf = Config{
-			Resolver: "cloudflare",
-			TTL:      300,
+			Resolver:    "cloudflare",
+			TTL:         300,
+			BindAddress: "127.0.0.1:53",
 		}
 
 		if err := saveConfig(); err != nil {
@@ -31,14 +35,16 @@ func init() {
 
 	if err := json.NewDecoder(file).Decode(&Conf); err != nil {
 		Conf = Config{
-			Resolver: "cloudflare",
-			TTL:      300,
+			Resolver:    "cloudflare",
+			TTL:         300,
+			BindAddress: "127.0.0.1:53",
 		}
 		if err := saveConfig(); err != nil {
 			panic("Failed to overwrite config file: " + err.Error())
 		}
 	}
 }
+
 func saveConfig() error {
 	if err := os.MkdirAll("/etc/easydoh", 0755); err != nil {
 		return err

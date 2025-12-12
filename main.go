@@ -10,7 +10,7 @@ import (
 	"github.com/isa0-gh/easydoh/resolver"
 )
 
-var bindAddr = "127.0.0.1:53"
+var bindAddr = config.Conf.BindAddress
 
 func HandleConn(data []byte, addr *net.UDPAddr, conn *net.UDPConn) {
 
