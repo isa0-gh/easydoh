@@ -1,4 +1,4 @@
-module github.com/isa0-gh/cf-doh
+module github.com/isa0-gh/easydoh
 
 go 1.24.9
 
