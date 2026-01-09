@@ -3,8 +3,6 @@ BINARY_NAME = easydoh
 BIN_DIR = /bin
 SYSTEMD_SERVICE_SRC = deploy/easydoh.service
 SYSTEMD_SERVICE_DEST = /etc/systemd/system/$(BINARY_NAME).service
-OPENRC_SCRIPT_SRC = deploy/easydoh
-OPENRC_SCRIPT_DEST = /etc/init.d/$(BINARY_NAME)
 
 # Default target
 all: build
@@ -14,20 +12,17 @@ build:
 	@echo "Building $(BINARY_NAME)..."
 	go build -o $(BINARY_NAME) .
 
-# Install binary and service/init script based on detected init system
+# Install binary and systemd service
 install: build
 	@echo "Installing $(BINARY_NAME) to $(BIN_DIR)..."
 	install -Dm755 $(BINARY_NAME) $(BIN_DIR)/$(BINARY_NAME)
 	
-	# Detect init system and install service script
+	# Install systemd service if systemd is detected
 	@if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then \
 		echo "Systemd detected, installing systemd service..."; \
 		install -Dm644 $(SYSTEMD_SERVICE_SRC) $(SYSTEMD_SERVICE_DEST); \
-	elif command -v rc-status >/dev/null 2>&1 && [ -d /etc/init.d ]; then \
-		echo "OpenRC detected, installing init script..."; \
-		install -Dm755 $(OPENRC_SCRIPT_SRC) $(OPENRC_SCRIPT_DEST); \
 	else \
-		echo "No known init system detected. Skipping service installation."; \
+		echo "Systemd not detected. Skipping service installation."; \
 	fi
 	
 	@echo "Installation complete."
