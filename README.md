@@ -37,14 +37,13 @@ Create or edit `/etc/easydoh/config.json`:
 
 ```json
 {
-  "resolver": "adguard",
+  "resolver": "https://dns.adguard-dns.com/dns-query",
   "ttl": 300,
   "bind_address": "127.0.0.1:53"
 }
 ```
 
-* `resolver` — choose from: `cloudflare`, `google`, `quad9`, `adguard`, `cisco`
-* `ttl` — DNS response time-to-live in seconds
+* `resolver` — choose from [this list](doh_servers.md)
 * `bind_address` — IP and port for the server to listen on
 
 ---
@@ -64,18 +63,6 @@ sudo systemctl stop easydoh.service
 
 # Check status
 sudo systemctl status easydoh.service
-```
-
-### OpenRC
-
-```bash
-# Enable and start the service
-sudo rc-update add easydoh default
-sudo rc-service easydoh start
-
-# Stop the service
-sudo rc-service easydoh stop
-```
 
 ---
 
