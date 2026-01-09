@@ -63,6 +63,7 @@ sudo systemctl stop easydoh.service
 
 # Check status
 sudo systemctl status easydoh.service
+```
 
 ---
 
