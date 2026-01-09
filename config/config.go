@@ -2,13 +2,17 @@ package config
 
 import (
 	"encoding/json"
+	"net/http"
 	"os"
+
+	"github.com/isa0-gh/easydoh/dns"
 )
 
 type Config struct {
 	Resolver    string `json:"resolver"`
 	TTL         int    `json:"ttl"`
 	BindAddress string `json:"bind_address"`
+	Client      *http.Client
 }
 
 var Conf Config
@@ -21,7 +25,7 @@ func init() {
 	if err != nil {
 		// File doesn't exist, create default config
 		Conf = Config{
-			Resolver:    "cloudflare",
+			Resolver:    "https://one.one.one.one/dns-query",
 			TTL:         300,
 			BindAddress: "127.0.0.1:53",
 		}
@@ -35,13 +39,18 @@ func init() {
 
 	if err := json.NewDecoder(file).Decode(&Conf); err != nil {
 		Conf = Config{
-			Resolver:    "cloudflare",
+			Resolver:    "https://one.one.one.one/dns-query",
 			TTL:         300,
 			BindAddress: "127.0.0.1:53",
 		}
 		if err := saveConfig(); err != nil {
 			panic("Failed to overwrite config file: " + err.Error())
 		}
+	}
+
+	Conf.Client, err = dns.ResolveServer(Conf.Resolver)
+	if err != nil {
+		panic(err)
 	}
 }
 

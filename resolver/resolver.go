@@ -4,23 +4,21 @@ import (
 	"bytes"
 	"io"
 	"net/http"
-	"time"
+
+	"github.com/isa0-gh/easydoh/config"
 )
 
-func Resolve(dnsmessage []byte, provider string) ([]byte, error) {
+func Resolve(dnsmessage []byte) ([]byte, error) {
 	var body []byte
 
-	client := http.Client{
-		Timeout: 10 * time.Second,
-	}
-	req, err := http.NewRequest("POST", provider, bytes.NewReader(dnsmessage))
+	req, err := http.NewRequest("POST", config.Conf.Resolver, bytes.NewReader(dnsmessage))
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Accept", "application/dns-message")
 	req.Header.Set("Content-Type", "application/dns-message")
 
-	resp, err := client.Do(req)
+	resp, err := config.Conf.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
