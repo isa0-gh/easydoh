@@ -37,7 +37,7 @@ func main() {
 	}
 	defer conn.Close()
 
-	log.Printf("[+] easydoh started. Resolver: %s Listening on %s\n", config.Conf.Resolver, bindAddr)
+	log.Printf("[+] easydoh started.\n[+] Resolver: %s Listening on %s\n", config.Conf.Resolver, bindAddr)
 
 	buf := make([]byte, 4096)
 

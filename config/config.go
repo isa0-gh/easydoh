@@ -3,6 +3,8 @@ package config
 import (
 	"encoding/json"
 	"net/http"
+	"time"
+	"fmt"
 	"os"
 
 	"github.com/isa0-gh/easydoh/dns"
@@ -48,9 +50,14 @@ func init() {
 		}
 	}
 
-	Conf.Client, err = dns.ResolveServer(Conf.Resolver)
-	if err != nil {
-		panic(err)
+	for {
+		Conf.Client, err = dns.ResolveServer(Conf.Resolver)
+		if err != nil {
+			fmt.Println("[ERROR] Couldn't resolved server trying again...",err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		break
 	}
 }
 
