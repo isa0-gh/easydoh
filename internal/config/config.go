@@ -2,10 +2,10 @@ package config
 
 import (
 	"encoding/json"
-	"net/http"
-	"time"
 	"fmt"
+	"net/http"
 	"os"
+	"time"
 
 	"github.com/isa0-gh/easydoh/internal/resolve-dns"
 )
@@ -53,7 +53,7 @@ func init() {
 	for {
 		Conf.Client, err = resolvedns.ResolveServer(Conf.Resolver)
 		if err != nil {
-			fmt.Println("[ERROR] Couldn't resolved server trying again...",err)
+			fmt.Println("[ERROR] Couldn't resolved server trying again...", err)
 			time.Sleep(5 * time.Second)
 			continue
 		}
