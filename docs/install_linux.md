@@ -4,7 +4,8 @@
 ```bash
 git clone https://github.com/isa0-gh/easydoh.git
 cd easydoh
-make install
+make
+sudo make install
 ````
 
 > The Makefile will automatically detect your init system and install the appropriate service script.
