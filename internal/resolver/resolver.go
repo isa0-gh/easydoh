@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/isa0-gh/easydoh/config"
+	"github.com/isa0-gh/easydoh/internal/config"
 )
 
 func Resolve(dnsmessage []byte) ([]byte, error) {

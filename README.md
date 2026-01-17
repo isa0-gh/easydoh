@@ -43,7 +43,7 @@ Create or edit `/etc/easydoh/config.json`:
 }
 ```
 
-* `resolver` — choose from [this list](doh_servers.md)
+* `resolver` — choose from [this list](docs/servers.md)
 * `bind_address` — IP and port for the server to listen on
 
 ---
