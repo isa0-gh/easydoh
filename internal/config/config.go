@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/isa0-gh/easydoh/dns"
+	"github.com/isa0-gh/easydoh/internal/resolve-dns"
 )
 
 type Config struct {
@@ -51,7 +51,7 @@ func init() {
 	}
 
 	for {
-		Conf.Client, err = dns.ResolveServer(Conf.Resolver)
+		Conf.Client, err = resolvedns.ResolveServer(Conf.Resolver)
 		if err != nil {
 			fmt.Println("[ERROR] Couldn't resolved server trying again...",err)
 			time.Sleep(5 * time.Second)
