@@ -19,6 +19,16 @@ func New() *CacheDB {
 	}
 }
 
+func QueryKey(message *dns.Msg) string {
+	question := message.Question
+	if len(question) == 0 {
+		return ""
+	}
+
+	return fmt.Sprintf("%s|%d", question[0].Name, question[0].Qtype)
+	
+}
+
 func (c *CacheDB) Add(message []byte, response []byte) error {
 	c.Mu.Lock()
 	defer c.Mu.Unlock()
@@ -28,16 +38,12 @@ func (c *CacheDB) Add(message []byte, response []byte) error {
 	if err := req.Unpack(message); err != nil {
 		return err
 	}
-	if len(req.Question) == 0 {
-		return fmt.Errorf("request contains no question section")
-	}
 
 	if err := resp.Unpack(response); err != nil {
 		return err
 	}
 
-	question := req.Question[0]
-	key := fmt.Sprintf("%s|%d", question.Name, question.Qtype)
+	key := QueryKey(req)
 	c.DB[key] = *resp
 	return nil
 }
@@ -47,11 +53,7 @@ func (c *CacheDB) Get(message []byte) ([]byte, bool, error) {
 	if err := msg.Unpack(message); err != nil {
 		return nil, false, err
 	}
-	if len(msg.Question) == 0 {
-		return nil, false, fmt.Errorf("request contains no question section")
-	}
-	question := msg.Question[0]
-	key := fmt.Sprintf("%s|%d", question.Name, question.Qtype)
+	key := QueryKey(msg)
 	c.Mu.RLock()
 	defer c.Mu.RUnlock()
 	for k, v := range c.DB {
@@ -64,21 +66,16 @@ func (c *CacheDB) Get(message []byte) ([]byte, bool, error) {
 	return nil, false, nil
 }
 
-func (c *CacheDB) Expire(data []byte, ttl int) {
-	msg := new(dns.Msg)
-	if err := msg.Unpack(data); err != nil {
-		return
-	}
-	if len(msg.Question) == 0 {
-		return
-	}
-	question := msg.Question[0]
-	key := fmt.Sprintf("%s|%d", question.Name, question.Qtype)
-	c.Mu.Lock()
-	go func(k string, d int) {
-		time.Sleep(time.Duration(d) * time.Second)
-		delete(c.DB, key)
-	}(key, ttl)
-
-	c.Mu.Unlock()
+func (c *CacheDB) StartFlusher(ttl time.Duration) {
+    ticker := time.NewTicker(ttl)
+    go func() {
+        for range ticker.C {
+            c.Mu.Lock()
+            c.DB = make(map[string]dns.Msg) // flush everything
+            c.Mu.Unlock()
+            fmt.Println("Cache flushed")
+        }
+    }()
 }
+
+
