@@ -1,7 +1,7 @@
 package config
 
 import (
-	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
@@ -62,7 +62,7 @@ func init() {
 	for {
 		Conf.Client, err = resolvedns.ResolveServer(Conf.Resolver)
 		if err != nil {
-			fmt.Println("[ERROR] Couldn't resolved server trying again...", err)
+			slog.Error("Couldn't resolved server trying again...", "error", err)
 			time.Sleep(5 * time.Second)
 			continue
 		}

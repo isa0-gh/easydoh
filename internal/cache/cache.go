@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"fmt"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -25,7 +25,7 @@ func QueryKey(message *dns.Msg) string {
 		return ""
 	}
 
-	return fmt.Sprintf("%s|%d", question[0].Name, question[0].Qtype)
+	return question[0].Name + "|" + string(rune(question[0].Qtype))
 	
 }
 
@@ -73,7 +73,7 @@ func (c *CacheDB) StartFlusher(ttl time.Duration) {
             c.Mu.Lock()
             c.DB = make(map[string]dns.Msg) // flush everything
             c.Mu.Unlock()
-            fmt.Println("Cache flushed")
+            slog.Info("Cache flushed")
         }
     }()
 }
