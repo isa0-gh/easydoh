@@ -18,6 +18,10 @@ Create or edit `/etc/easydoh/config.toml`:
 resolver = "https://dns.adguard-dns.com/dns-query"
 ttl = 300
 bind_address = "127.0.0.1:53"
+
+[hosts]
+"*.home" = "127.0.0.1"
+"test.local" = "192.168.1.100"
 ```
 
 * `resolver` — choose from [this list](docs/servers.md)

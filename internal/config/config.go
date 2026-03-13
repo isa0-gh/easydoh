@@ -12,9 +12,10 @@ import (
 )
 
 type Config struct {
-	Resolver    string `toml:"resolver"`
-	TTL         int    `toml:"ttl"`
-	BindAddress string `toml:"bind_address"`
+	Resolver    string            `toml:"resolver"`
+	TTL         int               `toml:"ttl"`
+	BindAddress string            `toml:"bind_address"`
+	Hosts       map[string]string `toml:"hosts"`
 	Client      *http.Client
 }
 
@@ -31,6 +32,9 @@ func init() {
 			Resolver:    "https://one.one.one.one/dns-query",
 			TTL:         300,
 			BindAddress: "127.0.0.1:53",
+			Hosts: map[string]string{
+				"*.home": "127.0.0.1",
+			},
 		}
 
 
@@ -46,6 +50,9 @@ func init() {
 			Resolver:    "https://one.one.one.one/dns-query",
 			TTL:         300,
 			BindAddress: "127.0.0.1:53",
+			Hosts: map[string]string{
+				"*.home": "127.0.0.1",
+			},
 		}
 		if err := saveConfig(); err != nil {
 			panic("Failed to overwrite config file: " + err.Error())

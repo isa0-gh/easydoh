@@ -3,7 +3,7 @@ module github.com/isa0-gh/easydoh
 go 1.24.9
 
 require (
-	github.com/miekg/dns v1.1.70
+	github.com/miekg/dns v1.1.72
 	github.com/pelletier/go-toml/v2 v2.2.4
 )
 

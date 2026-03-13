@@ -8,12 +8,21 @@ import (
 
 	"github.com/isa0-gh/easydoh/internal/cache"
 	"github.com/isa0-gh/easydoh/internal/config"
+	"github.com/isa0-gh/easydoh/internal/local"
 	"github.com/isa0-gh/easydoh/internal/resolver"
 )
 
 var bindAddr = config.Conf.BindAddress
 var cdb = cache.New()
 func HandleConn(data []byte, addr *net.UDPAddr, conn *net.UDPConn) {
+	if localResp, ok := local.Match(data); ok {
+		_, err := conn.WriteToUDP(localResp, addr)
+		if err != nil {
+			fmt.Printf("ERROR writing local resp: %s", err.Error())
+		}
+		return
+	}
+
 	var resp []byte
 	cached, ok, err := cdb.Get(data)
 	if err == nil && ok {
