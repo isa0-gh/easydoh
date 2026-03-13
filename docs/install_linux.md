@@ -44,15 +44,15 @@ docker compose logs -f
 
 ### Using Docker Run
 ```bash
-# Build the image locally
-docker build -t easydoh .
+# Pull the image
+docker pull ghcr.io/isa0-gh/easydoh:latest
 
 # Run the container (mapping host UDP 53 to container UDP 53)
 docker run -d --name easydoh \
   -p 53:53/udp \
   -v /etc/easydoh:/etc/easydoh \
   --restart unless-stopped \
-  easydoh
+  ghcr.io/isa0-gh/easydoh:latest
 ```
 
 ## Usage
