@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  easydoh:
+    build: .
+    image: easydoh:latest
+    container_name: easydoh
+    restart: unless-stopped
+    ports:
+      - "53:53/udp"
+    volumes:
+      - /etc/easydoh:/etc/easydoh

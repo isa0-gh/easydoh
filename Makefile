@@ -11,13 +11,10 @@
 BINARY := easydoh
 PKG := ./cmd/easydoh
 BIN_DIR ?= /bin
-SERVICE_SRC := internal/deploy/easydoh.service
-SERVICE_DEST := /etc/systemd/system/$(BINARY).service
 
 HOST_GOOS   := $(shell go env GOOS)
 HOST_GOARCH := $(shell go env GOARCH)
-
-.PHONY: all build cross-build install install-binary install-service install-service-only systemd-enable systemd-start systemd-stop clean
+.PHONY: all build cross-build install clean
 
 all: build
 
@@ -39,15 +36,10 @@ cross-build:
 	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath -ldflags="-s -w" -o ./$(BINARY)-linux-arm64 $(PKG)
 	@echo "Built: ./$(BINARY)-linux-amd64 ./$(BINARY)-linux-arm64"
 
-# Install will copy the linux binary to /bin/easydoh and install+enable the service.
-# Requires root.
-install: install-binary install-service
-	@echo "Install complete."
+# Install will copy the linux binary to /bin/easydoh. Requires root.
+install:
+	@if [ "$$(id -u)" -ne 0 ]; then echo "install requires root (sudo)"; exit 1; fi
 
-# Copy the binary to BIN_DIR (/bin). If local host built ./easydoh, use it.
-# Otherwise fall back to ./easydoh-linux-amd64 produced by cross-build.
-install-binary:
-	@if [ "$$(id -u)" -ne 0 ]; then echo "install-binary requires root (sudo)"; exit 1; fi
 	@if [ -f ./$(BINARY) ]; then \
 		echo "Installing ./$(BINARY) -> $(BIN_DIR)/$(BINARY)"; \
 		install -Dm0755 ./$(BINARY) $(BIN_DIR)/$(BINARY); \
@@ -61,42 +53,6 @@ install-binary:
 	fi
 	@echo "Binary installed to $(BIN_DIR)/$(BINARY)"
 
-# Install systemd unit (requires root). Uses the repo service file.
-install-service:
-	@if [ "$$(id -u)" -ne 0 ]; then echo "install-service requires root (sudo)"; exit 1; fi
-	@if [ ! -f $(SERVICE_SRC) ]; then echo "service file $(SERVICE_SRC) not found"; exit 1; fi
-	install -d -m 0755 /etc/systemd/system
-	install -m 0644 $(SERVICE_SRC) $(SERVICE_DEST)
-	systemctl daemon-reload
-	systemctl enable --now $(BINARY).service
-	@echo "Systemd unit installed and started."
-
-# Only install the service (if binary already in place)
-install-service-only:
-	@$(MAKE) install-service
-
-# Systemd management helpers
-systemd-enable:
-	@if command -v systemctl >/dev/null 2>&1; then \
-		systemctl daemon-reload; \
-		systemctl enable $(BINARY).service; \
-	else \
-		echo "systemctl not found"; \
-	fi
-
-systemd-start:
-	@if command -v systemctl >/dev/null 2>&1; then \
-		systemctl start $(BINARY).service; \
-	else \
-		echo "systemctl not found"; \
-	fi
-
-systemd-stop:
-	@if command -v systemctl >/dev/null 2>&1; then \
-		systemctl stop $(BINARY).service; \
-	else \
-		echo "systemctl not found"; \
-	fi
 
 clean:
 	@echo "Cleaning up..."
