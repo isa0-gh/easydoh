@@ -2,9 +2,9 @@ package main
 
 import (
 	"time"
-	"fmt"
-	"log"
+	"log/slog"
 	"net"
+	"os"
 
 	"github.com/isa0-gh/easydoh/internal/cache"
 	"github.com/isa0-gh/easydoh/internal/config"
@@ -18,7 +18,7 @@ func HandleConn(data []byte, addr *net.UDPAddr, conn *net.UDPConn) {
 	if localResp, ok := local.Match(data); ok {
 		_, err := conn.WriteToUDP(localResp, addr)
 		if err != nil {
-			fmt.Printf("ERROR writing local resp: %s", err.Error())
+			slog.Error("ERROR writing local resp", "error", err)
 		}
 		return
 	}
@@ -30,23 +30,25 @@ func HandleConn(data []byte, addr *net.UDPAddr, conn *net.UDPConn) {
 	} else {
 		resp, err = resolver.Resolve(data)
 		if err != nil {
-			fmt.Printf("ERROR: %s", err.Error())
+			slog.Error("ERROR resolving dns message", "error", err)
 			return
 		}
 		if err := cdb.Add(data, resp); err != nil {
-			fmt.Println("[CACHE ERROR]:", err)
+			slog.Error("CACHE ERROR", "error", err)
 		}
 
 	}
 
 	_, err = conn.WriteToUDP(resp, addr)
 	if err != nil {
-		fmt.Printf("ERROR: %s", err.Error())
+		slog.Error("ERROR writing to udp", "error", err)
 		return
 	}
 }
 
 func main() {
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
 	addr, err := net.ResolveUDPAddr("udp", bindAddr)
 	if err != nil {
 		panic(err)
@@ -58,14 +60,14 @@ func main() {
 	}
 	defer conn.Close()
 
-	log.Printf("[+] easydoh started.\n[+] Resolver: %s Listening on %s\n", config.Conf.Resolver, bindAddr)
+	slog.Info("easydoh started.", "resolver", config.Conf.Resolver, "listen", bindAddr)
 
 	buf := make([]byte, 4096)
 	cdb.StartFlusher(time.Duration(config.Conf.TTL) * time.Second)
 	for {
 		size, clientAddr, err := conn.ReadFromUDP(buf)
 		if err != nil {
-			fmt.Printf("ERROR: %s", err.Error())
+			slog.Error("ERROR reading from UDP", "error", err)
 			continue
 		}
 
