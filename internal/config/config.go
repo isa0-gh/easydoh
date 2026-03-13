@@ -31,7 +31,7 @@ func init() {
 		Conf = Config{
 			Resolver:    "https://one.one.one.one/dns-query",
 			TTL:         300,
-			BindAddress: "127.0.0.1:53",
+			BindAddress: "0.0.0.0:53",
 			Hosts: map[string]string{
 				"*.home": "127.0.0.1",
 			},
@@ -49,7 +49,7 @@ func init() {
 		Conf = Config{
 			Resolver:    "https://one.one.one.one/dns-query",
 			TTL:         300,
-			BindAddress: "127.0.0.1:53",
+			BindAddress: "0.0.0.0:53",
 			Hosts: map[string]string{
 				"*.home": "127.0.0.1",
 			},

@@ -17,7 +17,7 @@ Create or edit `/etc/easydoh/config.toml`:
 ```toml
 resolver = "https://dns.adguard-dns.com/dns-query"
 ttl = 300
-bind_address = "127.0.0.1:53"
+bind_address = "0.0.0.0:53"
 
 [hosts]
 "*.home" = "127.0.0.1"
