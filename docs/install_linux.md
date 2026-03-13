@@ -12,14 +12,12 @@ sudo make install
 
 2. **Configuration file**
 
-Create or edit `/etc/easydoh/config.json`:
+Create or edit `/etc/easydoh/config.toml`:
 
-```json
-{
-  "resolver": "https://dns.adguard-dns.com/dns-query",
-  "ttl": 300,
-  "bind_address": "127.0.0.1:53"
-}
+```toml
+resolver = "https://dns.adguard-dns.com/dns-query"
+ttl = 300
+bind_address = "127.0.0.1:53"
 ```
 
 * `resolver` — choose from [this list](docs/servers.md)
