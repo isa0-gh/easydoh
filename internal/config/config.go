@@ -2,12 +2,11 @@ package config
 
 import (
 	"fmt"
-
-	"github.com/pelletier/go-toml/v2"
-	"fmt"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/pelletier/go-toml/v2"
 
 	"github.com/isa0-gh/easydoh/internal/resolve-dns"
 )
