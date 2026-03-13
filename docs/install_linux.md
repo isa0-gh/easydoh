@@ -12,14 +12,16 @@ sudo make install
 
 2. **Configuration file**
 
-Create or edit `/etc/easydoh/config.json`:
+Create or edit `/etc/easydoh/config.toml`:
 
-```json
-{
-  "resolver": "https://dns.adguard-dns.com/dns-query",
-  "ttl": 300,
-  "bind_address": "127.0.0.1:53"
-}
+```toml
+resolver = "https://dns.adguard-dns.com/dns-query"
+ttl = 300
+bind_address = "127.0.0.1:53"
+
+[hosts]
+"*.home" = "127.0.0.1"
+"test.local" = "192.168.1.100"
 ```
 
 * `resolver` — choose from [this list](docs/servers.md)
@@ -27,21 +29,30 @@ Create or edit `/etc/easydoh/config.json`:
 
 ---
 
-## Service Management
+## Service Management (Docker)
 
-### Systemd
+To run EasyDoH continuously, we recommend using Docker. You should mount a volume to persist and provide your `config.toml`.
 
+### Using Docker Compose (Recommended)
 ```bash
-# Reload systemd and enable the service
-sudo systemctl daemon-reload
-sudo systemctl enable easydoh.service
+# Start the service in the background
+docker compose up -d
 
-# Start/Stop the service
-sudo systemctl start easydoh.service
-sudo systemctl stop easydoh.service
+# View logs
+docker compose logs -f
+```
 
-# Check status
-sudo systemctl status easydoh.service
+### Using Docker Run
+```bash
+# Build the image locally
+docker build -t easydoh .
+
+# Run the container (mapping host UDP 53 to container UDP 53)
+docker run -d --name easydoh \
+  -p 53:53/udp \
+  -v /etc/easydoh:/etc/easydoh \
+  --restart unless-stopped \
+  easydoh
 ```
 
 ## Usage

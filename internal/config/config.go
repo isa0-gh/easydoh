@@ -1,25 +1,27 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/pelletier/go-toml/v2"
+
 	"github.com/isa0-gh/easydoh/internal/resolve-dns"
 )
 
 type Config struct {
-	Resolver    string `json:"resolver"`
-	TTL         int    `json:"ttl"`
-	BindAddress string `json:"bind_address"`
+	Resolver    string            `toml:"resolver"`
+	TTL         int               `toml:"ttl"`
+	BindAddress string            `toml:"bind_address"`
+	Hosts       map[string]string `toml:"hosts"`
 	Client      *http.Client
 }
 
 var Conf Config
 
-const configPath = "/etc/easydoh/config.json"
+const configPath = "/etc/easydoh/config.toml"
 
 func init() {
 	// Try to open the config file
@@ -30,7 +32,11 @@ func init() {
 			Resolver:    "https://one.one.one.one/dns-query",
 			TTL:         300,
 			BindAddress: "127.0.0.1:53",
+			Hosts: map[string]string{
+				"*.home": "127.0.0.1",
+			},
 		}
+
 
 		if err := saveConfig(); err != nil {
 			panic("Failed to create config file: " + err.Error())
@@ -39,11 +45,14 @@ func init() {
 	}
 	defer file.Close()
 
-	if err := json.NewDecoder(file).Decode(&Conf); err != nil {
+	if err := toml.NewDecoder(file).Decode(&Conf); err != nil {
 		Conf = Config{
 			Resolver:    "https://one.one.one.one/dns-query",
 			TTL:         300,
 			BindAddress: "127.0.0.1:53",
+			Hosts: map[string]string{
+				"*.home": "127.0.0.1",
+			},
 		}
 		if err := saveConfig(); err != nil {
 			panic("Failed to overwrite config file: " + err.Error())
@@ -72,7 +81,7 @@ func saveConfig() error {
 	}
 	defer file.Close()
 
-	encoder := json.NewEncoder(file)
-	encoder.SetIndent("", "  ")
+	encoder := toml.NewEncoder(file)
+	encoder.SetIndentTables(true)
 	return encoder.Encode(Conf)
 }
