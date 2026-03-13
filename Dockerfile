@@ -11,6 +11,9 @@ RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o easydoh ./cm
 # Final stage
 FROM alpine:latest
 
+# Install CA certificates to enable HTTPS requests to upstream DoH resolvers
+RUN apk --no-cache add ca-certificates
+
 WORKDIR /app
 COPY --from=builder /app/easydoh .
 
