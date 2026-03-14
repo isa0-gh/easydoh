@@ -4,14 +4,25 @@ import (
 	"net"
 	"strings"
 
-	"github.com/isa0-gh/resolv/internal/config"
 	"github.com/miekg/dns"
 )
 
+type Matcher struct {
+	hosts map[string]string
+	ttl   int
+}
+
+func NewMatcher(hosts map[string]string, ttl int) *Matcher {
+	return &Matcher{
+		hosts: hosts,
+		ttl:   ttl,
+	}
+}
+
 // Match checks the DNS message against configured local hosts using exact or wildcard matching.
 // It returns a boolean indicating if it intercepted the request, and a byte response if true.
-func Match(reqBytes []byte) ([]byte, bool) {
-	if len(config.Conf.Hosts) == 0 {
+func (m *Matcher) Match(reqBytes []byte) ([]byte, bool) {
+	if len(m.hosts) == 0 {
 		return nil, false
 	}
 
@@ -31,7 +42,7 @@ func Match(reqBytes []byte) ([]byte, bool) {
 		return nil, false
 	}
 
-	ipStr, found := matchHost(name)
+	ipStr, found := m.matchHost(name)
 	if !found {
 		return nil, false
 	}
@@ -48,12 +59,12 @@ func Match(reqBytes []byte) ([]byte, bool) {
 
 	if isIPv4 && q.Qtype == dns.TypeA {
 		rr := new(dns.A)
-		rr.Hdr = dns.RR_Header{Name: q.Name, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: uint32(config.Conf.TTL)}
+		rr.Hdr = dns.RR_Header{Name: q.Name, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: uint32(m.ttl)}
 		rr.A = ip.To4()
 		resp.Answer = append(resp.Answer, rr)
 	} else if (!isIPv4) && q.Qtype == dns.TypeAAAA {
 		rr := new(dns.AAAA)
-		rr.Hdr = dns.RR_Header{Name: q.Name, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: uint32(config.Conf.TTL)}
+		rr.Hdr = dns.RR_Header{Name: q.Name, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: uint32(m.ttl)}
 		rr.AAAA = ip.To16()
 		resp.Answer = append(resp.Answer, rr)
 	} else {
@@ -70,14 +81,14 @@ func Match(reqBytes []byte) ([]byte, bool) {
 	return respBytes, true
 }
 
-func matchHost(domain string) (string, bool) {
+func (m *Matcher) matchHost(domain string) (string, bool) {
 	// Exact match
-	if ip, ok := config.Conf.Hosts[domain]; ok {
+	if ip, ok := m.hosts[domain]; ok {
 		return ip, true
 	}
 
 	// Wildcard match
-	for pattern, ip := range config.Conf.Hosts {
+	for pattern, ip := range m.hosts {
 		if strings.HasPrefix(pattern, "*.") {
 			suffix := strings.TrimPrefix(pattern, "*.")
 			// Ensure it matches example.com for *.example.com OR sub.example.com

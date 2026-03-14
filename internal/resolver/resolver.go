@@ -4,31 +4,38 @@ import (
 	"bytes"
 	"io"
 	"net/http"
-
-	"github.com/isa0-gh/resolv/internal/config"
 )
 
-func Resolve(dnsmessage []byte) ([]byte, error) {
-	var body []byte
+type Resolver struct {
+	url    string
+	client *http.Client
+}
 
-	req, err := http.NewRequest("POST", config.Conf.Resolver, bytes.NewReader(dnsmessage))
+func NewResolver(url string, client *http.Client) *Resolver {
+	return &Resolver{
+		url:    url,
+		client: client,
+	}
+}
+
+func (r *Resolver) Resolve(dnsmessage []byte) ([]byte, error) {
+	req, err := http.NewRequest("POST", r.url, bytes.NewReader(dnsmessage))
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Accept", "application/dns-message")
 	req.Header.Set("Content-Type", "application/dns-message")
 
-	resp, err := config.Conf.Client.Do(req)
+	resp, err := r.client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	body, err = io.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
 	return body, err
-
 }

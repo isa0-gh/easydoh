@@ -1,21 +1,26 @@
 package main
 
 import (
-	"time"
+	"flag"
 	"log/slog"
 	"net"
 	"os"
+	"time"
 
 	"github.com/isa0-gh/resolv/internal/cache"
 	"github.com/isa0-gh/resolv/internal/config"
 	"github.com/isa0-gh/resolv/internal/local"
+	"github.com/isa0-gh/resolv/internal/resolve-dns"
 	"github.com/isa0-gh/resolv/internal/resolver"
+	"github.com/isa0-gh/resolv/internal/service"
 )
 
-var bindAddr = config.Conf.BindAddress
-var cdb = cache.New()
-func HandleConn(data []byte, addr *net.UDPAddr, conn *net.UDPConn) {
-	if localResp, ok := local.Match(data); ok {
+type Server struct {
+	repo *service.ServiceRepo
+}
+
+func (s *Server) HandleConn(data []byte, addr *net.UDPAddr, conn *net.UDPConn) {
+	if localResp, ok := s.repo.Local.Match(data); ok {
 		_, err := conn.WriteToUDP(localResp, addr)
 		if err != nil {
 			slog.Error("ERROR writing local resp", "error", err)
@@ -24,16 +29,16 @@ func HandleConn(data []byte, addr *net.UDPAddr, conn *net.UDPConn) {
 	}
 
 	var resp []byte
-	cached, ok, err := cdb.Get(data)
+	cached, ok, err := s.repo.Cache.Get(data)
 	if err == nil && ok {
 		resp = cached
 	} else {
-		resp, err = resolver.Resolve(data)
+		resp, err = s.repo.Resolver.Resolve(data)
 		if err != nil {
 			slog.Error("ERROR resolving dns message", "error", err)
 			return
 		}
-		if err := cdb.Add(data, resp); err != nil {
+		if err := s.repo.Cache.Add(data, resp); err != nil {
 			slog.Error("CACHE ERROR", "error", err)
 		}
 
@@ -47,9 +52,33 @@ func HandleConn(data []byte, addr *net.UDPAddr, conn *net.UDPConn) {
 }
 
 func main() {
+	configPath := flag.String("config", config.DefaultConfigPath, "path to config file")
+	flag.Parse()
+
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
-	addr, err := net.ResolveUDPAddr("udp", bindAddr)
+
+	conf, err := config.Load(*configPath)
+	if err != nil {
+		slog.Error("Failed to load config", "error", err)
+		os.Exit(1)
+	}
+
+	client, err := resolvedns.ResolveServer(conf.Resolver)
+	if err != nil {
+		slog.Error("Failed to initialize http client", "error", err)
+		os.Exit(1)
+	}
+	conf.Client = client
+
+	cdb := cache.New()
+	matcher := local.NewMatcher(conf.Hosts, conf.TTL)
+	res := resolver.NewResolver(conf.Resolver, conf.Client)
+	repo := service.NewServiceRepo(conf, cdb, matcher, res)
+
+	srv := &Server{repo: repo}
+
+	addr, err := net.ResolveUDPAddr("udp", conf.BindAddress)
 	if err != nil {
 		panic(err)
 	}
@@ -60,10 +89,10 @@ func main() {
 	}
 	defer conn.Close()
 
-	slog.Info("resolv started.", "resolver", config.Conf.Resolver, "listen", bindAddr)
+	slog.Info("resolv started.", "resolver", conf.Resolver, "listen", conf.BindAddress, "config", *configPath)
 
 	buf := make([]byte, 4096)
-	cdb.StartFlusher(time.Duration(config.Conf.TTL) * time.Second)
+	repo.Cache.StartFlusher(time.Duration(conf.TTL) * time.Second)
 	for {
 		size, clientAddr, err := conn.ReadFromUDP(buf)
 		if err != nil {
@@ -73,8 +102,6 @@ func main() {
 
 		request := make([]byte, size)
 		copy(request, buf[:size])
-		go HandleConn(request, clientAddr, conn)
-
+		go srv.HandleConn(request, clientAddr, conn)
 	}
-
 }

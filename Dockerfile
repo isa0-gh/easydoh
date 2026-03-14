@@ -17,9 +17,6 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /app
 COPY --from=builder /app/resolv .
 
-# Create config directory
-RUN mkdir -p /etc/resolv
-
 EXPOSE 53/udp
 
-ENTRYPOINT ["./resolv"]
+ENTRYPOINT ["./resolv", "-config", "config.toml"]
