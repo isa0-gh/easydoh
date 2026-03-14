@@ -2,8 +2,8 @@
 1. **Build and install using Makefile**
 
 ```bash
-git clone https://github.com/isa0-gh/easydoh.git
-cd easydoh
+git clone https://github.com/isa0-gh/resolv.git
+cd resolv
 make
 sudo make install
 ````
@@ -12,7 +12,7 @@ sudo make install
 
 2. **Configuration file**
 
-Create or edit `/etc/easydoh/config.toml`:
+Create or edit `/etc/resolv/config.toml`:
 
 ```toml
 resolver = "https://dns.adguard-dns.com/dns-query"
@@ -31,7 +31,7 @@ bind_address = "0.0.0.0:53"
 
 ## Service Management (Docker)
 
-To run EasyDoH continuously, we recommend using Docker. You should mount a volume to persist and provide your `config.toml`.
+To run resolv continuously, we recommend using Docker. You should mount a volume to persist and provide your `config.toml`.
 
 ### Using Docker Compose (Recommended)
 ```bash
@@ -45,14 +45,14 @@ docker compose logs -f
 ### Using Docker Run
 ```bash
 # Pull the image
-docker pull ghcr.io/isa0-gh/easydoh:latest
+docker pull ghcr.io/isa0-gh/resolv:latest
 
 # Run the container (mapping host UDP 53 to container UDP 53)
-docker run -d --name easydoh \
+docker run -d --name resolv \
   -p 53:53/udp \
-  -v /etc/easydoh:/etc/easydoh \
+  -v /etc/resolv:/etc/resolv \
   --restart unless-stopped \
-  ghcr.io/isa0-gh/easydoh:latest
+  ghcr.io/isa0-gh/resolv:latest
 ```
 
 ## Usage

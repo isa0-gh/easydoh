@@ -8,7 +8,7 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 
-	"github.com/isa0-gh/easydoh/internal/resolve-dns"
+	"github.com/isa0-gh/resolv/internal/resolve-dns"
 )
 
 type Config struct {
@@ -21,7 +21,7 @@ type Config struct {
 
 var Conf Config
 
-const configPath = "/etc/easydoh/config.toml"
+const configPath = "/etc/resolv/config.toml"
 
 func init() {
 	// Try to open the config file
@@ -71,7 +71,7 @@ func init() {
 }
 
 func saveConfig() error {
-	if err := os.MkdirAll("/etc/easydoh", 0755); err != nil {
+	if err := os.MkdirAll("/etc/resolv", 0755); err != nil {
 		return err
 	}
 

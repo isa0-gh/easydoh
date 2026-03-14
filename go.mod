@@ -1,4 +1,4 @@
-module github.com/isa0-gh/easydoh
+module github.com/isa0-gh/resolv
 
 go 1.24.9
 

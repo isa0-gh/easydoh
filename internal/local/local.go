@@ -4,7 +4,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/isa0-gh/easydoh/internal/config"
+	"github.com/isa0-gh/resolv/internal/config"
 	"github.com/miekg/dns"
 )
 

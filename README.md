@@ -1,8 +1,8 @@
-# EasyDoH
+# resolv
 
-**EasyDoH** is a simple DNS-over-HTTPS (DoH) server written in Go. It allows you to run a local DoH server that forwards DNS queries to popular public resolvers.  
+**resolv** is a simple DNS-over-HTTPS (DoH) server written in Go. It allows you to run a local DoH server that forwards DNS queries to popular public resolvers.  
 
-[GitHub Repository](https://github.com/isa0-gh/easydoh)
+[GitHub Repository](https://github.com/isa0-gh/resolv)
 
 ---
 

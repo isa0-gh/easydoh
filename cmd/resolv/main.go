@@ -6,10 +6,10 @@ import (
 	"net"
 	"os"
 
-	"github.com/isa0-gh/easydoh/internal/cache"
-	"github.com/isa0-gh/easydoh/internal/config"
-	"github.com/isa0-gh/easydoh/internal/local"
-	"github.com/isa0-gh/easydoh/internal/resolver"
+	"github.com/isa0-gh/resolv/internal/cache"
+	"github.com/isa0-gh/resolv/internal/config"
+	"github.com/isa0-gh/resolv/internal/local"
+	"github.com/isa0-gh/resolv/internal/resolver"
 )
 
 var bindAddr = config.Conf.BindAddress
@@ -60,7 +60,7 @@ func main() {
 	}
 	defer conn.Close()
 
-	slog.Info("easydoh started.", "resolver", config.Conf.Resolver, "listen", bindAddr)
+	slog.Info("resolv started.", "resolver", config.Conf.Resolver, "listen", bindAddr)
 
 	buf := make([]byte, 4096)
 	cdb.StartFlusher(time.Duration(config.Conf.TTL) * time.Second)

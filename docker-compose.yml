@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  easydoh:
-    image: ghcr.io/isa0-gh/easydoh:latest
-    container_name: easydoh
+  resolv:
+    image: ghcr.io/isa0-gh/resolv:latest
+    container_name: resolv
     restart: unless-stopped
     ports:
       - "53:53/udp"
     volumes:
-      - /etc/easydoh:/etc/easydoh
+      - /etc/resolv:/etc/resolv

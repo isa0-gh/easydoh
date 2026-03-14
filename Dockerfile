@@ -6,7 +6,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o easydoh ./cmd/easydoh
+RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o resolv ./cmd/resolv
 
 # Final stage
 FROM alpine:latest
@@ -15,11 +15,11 @@ FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 
 WORKDIR /app
-COPY --from=builder /app/easydoh .
+COPY --from=builder /app/resolv .
 
 # Create config directory
-RUN mkdir -p /etc/easydoh
+RUN mkdir -p /etc/resolv
 
 EXPOSE 53/udp
 
-ENTRYPOINT ["./easydoh"]
+ENTRYPOINT ["./resolv"]
