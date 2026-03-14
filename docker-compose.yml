@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   resolv:
     image: ghcr.io/isa0-gh/resolv:latest
@@ -8,4 +6,4 @@ services:
     ports:
       - "53:53/udp"
     volumes:
-      - ./resolv-data:/app/
+      - ./resolv-data:/app
