@@ -8,4 +8,4 @@ services:
     ports:
       - "53:53/udp"
     volumes:
-      - ./config.toml:/app/config.toml
+      - ./resolv-data:/app/
